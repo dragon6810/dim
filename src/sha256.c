@@ -3,11 +3,11 @@
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 
 #define N_SQRTS   8
 #define N_CUBERTS 64
+#define BLOCKWORDS (512 / 32)
 
 static uint32_t sha256_h[N_SQRTS] = {};
 static uint32_t sha256_k[N_CUBERTS] = {};
@@ -75,6 +75,11 @@ static void sha256_calcroots(void)
         frac = root - (int) root;
         sha256_k[i] = frac * 0xFFFFFFFFu;
     }
+}
+
+void sha256_hash(void* data, uint64_t len, uint32_t outhash[8])
+{
+
 }
 
 void sha256_setup(void)
