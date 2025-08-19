@@ -6,7 +6,11 @@
 #include <stdint.h>
 #include <stdio.h>
 
-static uint32_t squareroots[8] = {};
+#define N_SQRTS   8
+#define N_CUBERTS 64
+
+static uint32_t sha256_h[N_SQRTS] = {};
+static uint32_t sha256_k[N_CUBERTS] = {};
 
 static bool sha256_isprime(int n)
 {
@@ -48,27 +52,32 @@ static void sha256_firsprimes(int n, int* primes)
     }
 }
 
-static void sha256_squareroots(void)
+static void sha256_calcroots(void)
 {
     int i;
 
-    int firstprimes[8];
-    double primesqrt;
+    int firstprimes[N_CUBERTS];
+    double root;
     double frac;
 
-    sha256_firsprimes(8, firstprimes);
-    for(i=0; i<8; i++)
+    sha256_firsprimes(N_SQRTS, firstprimes);
+    for(i=0; i<N_SQRTS; i++)
     {
-        primesqrt = sqrt(firstprimes[i]);
-        frac = primesqrt - (int) primesqrt;
-        squareroots[i] = frac * 0xFFFFFFFFu;
+        root = sqrt(firstprimes[i]);
+        frac = root - (int) root;
+        sha256_h[i] = frac * 0xFFFFFFFFu;
     }
 
-    for(i=0; i<8; i++)
-        printf("h%d := 0x%08x\n", i, squareroots[i]);
+    sha256_firsprimes(N_CUBERTS, firstprimes);
+    for(i=0; i<N_CUBERTS; i++)
+    {
+        root = cbrt(firstprimes[i]);
+        frac = root - (int) root;
+        sha256_k[i] = frac * 0xFFFFFFFFu;
+    }
 }
 
 void sha256_setup(void)
 {
-    sha256_squareroots();
+    sha256_calcroots();
 }
