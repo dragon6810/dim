@@ -25,7 +25,7 @@ static bool sha256_isprime(int n)
         return false;
 
     sqrtn = sqrt(n);
-    for(i=3; i<sqrtn; i++)
+    for(i=3; i<=sqrtn; i++)
         if(!(n % i))
             return false;
 
@@ -43,9 +43,8 @@ static void sha256_firsprimes(int n, int* primes)
     for(i=nprimes=0; nprimes<n; i++)
     {
         if(!sha256_isprime(i))
-            continue;;
+            continue;
         primes[nprimes++] = i;
-        printf("%d is prime.\n", i);
     }
 }
 
@@ -54,8 +53,16 @@ static void sha256_squareroots(void)
     int i;
 
     int firstprimes[8];
+    double primesqrt;
+    double frac;
 
     sha256_firsprimes(8, firstprimes);
+    for(i=0; i<8; i++)
+    {
+        primesqrt = sqrt(firstprimes[i]);
+        frac = primesqrt - (int) primesqrt;
+        squareroots[i] = frac * 0xFFFFFFFFu;
+    }
 
     for(i=0; i<8; i++)
         printf("h%d := 0x%08x\n", i, squareroots[i]);
