@@ -4,10 +4,13 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define N_SQRTS   8
-#define N_CUBERTS 64
-#define BLOCKWORDS (512 / 32)
+#define N_SQRTS    8
+#define N_CUBERTS  64
+#define BLOCKSIZE  512
+#define BLOCKWORDS (BLOCKSIZE / 32)
 
 static uint32_t sha256_h[N_SQRTS] = {};
 static uint32_t sha256_k[N_CUBERTS] = {};
@@ -79,7 +82,22 @@ static void sha256_calcroots(void)
 
 void sha256_hash(void* data, uint64_t len, uint32_t outhash[8])
 {
+    uint32_t *paddeddata;
+    uint64_t paddedlen;
 
+    assert(data);
+    assert(len);
+    assert(outhash);
+
+    paddedlen = (len + BLOCKSIZE) / BLOCKSIZE * BLOCKSIZE;
+    paddeddata = malloc(paddedlen);
+
+    memcpy(paddeddata, data, len);
+    memset((char*) paddeddata + len, 0, paddedlen - len);
+    ((char*)paddeddata)[len] = 0x80;
+    ((uint64_t*)paddeddata)[paddedlen / 8 - 1] = htonll(len);
+
+    free(paddeddata);
 }
 
 void sha256_setup(void)

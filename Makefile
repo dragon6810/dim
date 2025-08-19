@@ -1,5 +1,6 @@
 CC = clang
-CFLAGS = -Wall -Werror
+LDFLAGS = -fsanitize=address -g
+CFLAGS = -Wall -Werror -fsanitize=address -g
 
 BIN_DIR = bin
 OBJ_DIR = obj
@@ -23,7 +24,7 @@ mkdirs:
 	mkdir -p $(OBJ_DIR)/$(SRC_DIR)
 
 $(BIN_FILE): $(OBJ_FILE)
-	$(CC) $(OBJ_FILE) -o $(BIN_FILE)
+	$(CC) $(LDFLAGS) $(OBJ_FILE) -o $(BIN_FILE)
 
 $(OBJ_DIR)/$(SRC_DIR)/%.c.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
