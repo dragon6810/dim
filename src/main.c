@@ -1,6 +1,8 @@
 #include <stdio.h>
 
+#include "sha256.h"
+
 int main(int argc, char** argv)
 {
-    printf("dim\n");
+    sha256_setup();
 }

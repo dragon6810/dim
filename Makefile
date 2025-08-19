@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = 
+CFLAGS = -Wall -Werror
 
 BIN_DIR = bin
 OBJ_DIR = obj
