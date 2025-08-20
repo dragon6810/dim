@@ -1,6 +1,8 @@
 #include "repo.h"
 
+#include <assert.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 bool checkrepo(void)
 {
@@ -10,4 +12,15 @@ bool checkrepo(void)
         return false;
 
     return true;
+}
+
+bool checkhash(shahash_t hash)
+{
+    char filename[PATH_MAX];
+    struct stat st;
+
+    snprintf(filename, PATH_MAX-1, ".dim/obj/%08x%08x%08x%08x%08x%08x%08x%08x",
+        hash[0], hash[1], hash[2], hash[3], hash[4], hash[5], hash[6], hash[7]);
+
+    return stat(filename, &st) != -1;
 }

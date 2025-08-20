@@ -3,5 +3,6 @@
 
 void mkrepo(int argc, char** argv);
 void mkblob(int argc, char** argv);
+void add(int argc, char** argv);
 
 #endif

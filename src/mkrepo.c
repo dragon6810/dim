@@ -8,6 +8,8 @@
 
 void mkrepo(int argc, char** argv)
 {
+    FILE *ptr;
+
     if(argc)
     {
         printf("mkrepo: no arguments expected.\n");
@@ -21,4 +23,11 @@ void mkrepo(int argc, char** argv)
     }
 
     mkdir(".dim", S_IRWXU | S_IRWXG | S_IRWXO);
+    ptr = fopen(".dim/index", "w");
+    if(!ptr)
+    {
+        printf("mkrepo: couldn't create file \"%s\".\n", "./dim/index");
+        exit(1);
+    }
+    fclose(ptr);
 }

@@ -9,16 +9,6 @@
 #include "repo.h"
 #include "sha256.h"
 
-void mkblobdir(void)
-{
-    struct stat st;
-
-    if(stat(".dim/obj/blob", &st) != -1)
-        return;
-
-    mkdir(".dim/obj/blob", S_IRWXU | S_IRWXG | S_IRWXO);
-}
-
 void mkobjdir(void)
 {
     struct stat st;
@@ -39,18 +29,20 @@ void writeblob(FILE* text, shahash_t hash)
     assert(text);
     assert(hash);
 
+    if(checkhash(hash))
+        return;
+
     mkobjdir();
-    mkblobdir();
 
     fseek(text, 0, SEEK_END);
     textlen = ftell(text);
     fseek(text, 0, SEEK_SET);
     textdata = malloc(textlen);
     fread(textdata, 1, textlen, text);
-
-    snprintf(blobpath, PATH_MAX-1, ".dim/obj/blob/%08x%08x%08x%08x%08x%08x%08x%08x",
-        hash[0], hash[1], hash[2], hash[3], hash[4], hash[5], hash[6], hash[7]);
     
+    snprintf(blobpath, PATH_MAX-1, ".dim/obj/%08x%08x%08x%08x%08x%08x%08x%08x",
+        hash[0], hash[1], hash[2], hash[3], hash[4], hash[5], hash[6], hash[7]);
+
     blob = fopen(blobpath, "w");
     if(!blob)
     {
@@ -99,6 +91,8 @@ void mkblob(int argc, char** argv)
     sha256_hashfile(ptr, hash);
 
     writeblob(ptr, hash);
+    printf("%08x%08x%08x%08x%08x%08x%08x%08x\n",
+        hash[0], hash[1], hash[2], hash[3], hash[4], hash[5], hash[6], hash[7]);
 
     fclose(ptr);
 }
