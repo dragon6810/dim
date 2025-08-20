@@ -32,6 +32,8 @@ int main(int argc, char** argv)
         usage();
     else if(!strcmp("mkrepo", argv[1]))
         mkrepo(argc - 2, argv + 2);
+    else if(!strcmp("mkblob", argv[1]))
+        mkblob(argc - 2, argv + 2);
     else
     {
         printf("unrecognized command \"%s\".\n", argv[1]);

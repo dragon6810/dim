@@ -1,19 +1,10 @@
 #include "commands.h"
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
-bool checkrepo(void)
-{
-    struct stat st;
-
-    if(stat(".dim", &st) == -1)
-        return false;
-
-    return true;
-}
+#include "repo.h"
 
 void mkrepo(int argc, char** argv)
 {
@@ -29,5 +20,5 @@ void mkrepo(int argc, char** argv)
         exit(1);
     }
 
-    mkdir(".dim", 0666);
+    mkdir(".dim", S_IRWXU | S_IRWXG | S_IRWXO);
 }
