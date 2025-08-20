@@ -6,17 +6,24 @@
 
 int main(int argc, char** argv)
 {
-    const char msg[] = "this is a message";
-
     int i;
 
-    uint32_t hashed[8];
+    FILE *ptr;
+
+    shahash_t hash;
 
     sha256_setup();
 
-    sha256_hash((void*) msg, strlen(msg), hashed);
-    printf("hashed message: 0x");
+    ptr = fopen("file.c", "r");
+    if(!ptr)
+        return 1;
+    sha256_hashfile(ptr, hash);
+    fclose(ptr);
+
+    printf("0x");
     for(i=0; i<8; i++)
-        printf("%08x", hashed[i]);
+        printf("%08x", hash[i]);
     printf("\n");
+
+    return 0;
 }

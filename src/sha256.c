@@ -162,7 +162,27 @@ static void sha256_processblock(void* block, uint32_t h[N_SQRTS])
         h[i] += addh[i];
 }
 
-void sha256_hash(void* data, uint64_t len, uint32_t outhash[8])
+void sha256_hashfile(FILE* ptr, shahash_t outhash)
+{
+    void *data;
+    uint64_t filelen;
+
+    assert(ptr);
+    assert(outhash);
+
+    fseek(ptr, 0, SEEK_END);
+    filelen = ftell(ptr);
+    fseek(ptr, 0, SEEK_SET);
+
+    data = malloc(filelen);
+    fread(data, 1, filelen, ptr);
+
+    sha256_hash(data, filelen, outhash);
+
+    free(data);
+}
+
+void sha256_hash(void* data, uint64_t len, shahash_t outhash)
 {
     int i;
 
