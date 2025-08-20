@@ -95,7 +95,7 @@ static inline uint32_t swap32(uint32_t v)
            ((v & 0xFF000000u) >> 24);
 }
 
-static inline uint32_t htob32(uint64_t v)
+static inline uint32_t btoh32(uint32_t v)
 {
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     return swap32(v);
@@ -118,20 +118,19 @@ static void sha256_processblock(void* block, uint32_t h[N_SQRTS])
 {
     int i, j;
 
-    uint32_t *words;
-    uint32_t s[2], newh[8], ch, t[2], maj;
+    uint32_t words[64];
+    uint32_t s[2], addh[N_SQRTS], ch, t[2], maj;
 
     assert(block);
     assert(h);
 
-    words = malloc(sizeof(uint32_t) * 64);
     memcpy(words, block, BLOCKSIZE);
     memset(words + BLOCKWORDS, 0, sizeof(uint32_t) * (64 - BLOCKWORDS));
 
-    for(i=0; i<16; i++)
-        words[i] = htob32(words[i]);
+    for(i=0; i<64; i++)
+        words[i] = btoh32(words[i]);
 
-    for(; i<64; i++)
+    for(i=BLOCKWORDS; i<64; i++)
     {
         s[0] = sha256_rotateright(words[i-15], 7) 
              ^ sha256_rotateright(words[i-15], 18) 
@@ -142,39 +141,36 @@ static void sha256_processblock(void* block, uint32_t h[N_SQRTS])
         words[i] = words[i - 16] + s[0] + words[i - 7] + s[1];
     }
 
-    memcpy(newh, h, sizeof(newh));
+    memcpy(addh, h, sizeof(addh));
     for(i=0; i<64; i++)
     {
-        s[1] = sha256_rotateright(newh[4], 6) ^ sha256_rotateright(newh[4], 11) ^ sha256_rotateright(newh[4], 25);
-        ch = (newh[4] & newh[5]) ^ ((~newh[4]) & newh[6]);
-        t[0] = newh[7] + s[1] + ch + sha256_k[i] + words[i];
-        s[0] = sha256_rotateright(newh[0], 2) ^ sha256_rotateright(newh[0], 13) ^ sha256_rotateright(newh[0], 22);
-        maj = (newh[0] & newh[1]) ^ (newh[0] & newh[2]) ^ (newh[1] & newh[2]);
+        s[1] = sha256_rotateright(addh[4], 6) ^ sha256_rotateright(addh[4], 11) ^ sha256_rotateright(addh[4], 25);
+        ch = (addh[4] & addh[5]) ^ (~addh[4] & addh[6]);
+        t[0] = addh[7] + s[1] + ch + sha256_k[i] + words[i];
+        s[0] = sha256_rotateright(addh[0], 2) ^ sha256_rotateright(addh[0], 13) ^ sha256_rotateright(addh[0], 22);
+        maj = (addh[0] & addh[1]) ^ (addh[0] & addh[2]) ^ (addh[1] & addh[2]);
         t[1] = s[0] + maj;
 
-        for(j=7; j>0; j--)
-            newh[j] = newh[j - 1];
+        for(j=N_SQRTS-1; j>0; j--)
+            addh[j] = addh[j - 1];
 
-        newh[4] += t[0];
-        newh[0] = t[0] + t[1];
+        addh[4] += t[0];
+        addh[0] = t[0] + t[1];
     }
 
-    for(i=0; i<8; i++)
-        h[i] += newh[i];
-
-    free(words);
+    for(i=0; i<N_SQRTS; i++)
+        h[i] += addh[i];
 }
 
 void sha256_hash(void* data, uint64_t len, uint32_t outhash[8])
 {
     int i;
 
-    uint32_t *paddeddata;
+    void *paddeddata;
     uint64_t paddedlen, nblocks;
     uint32_t h[N_SQRTS];
 
     assert(data);
-    assert(len);
     assert(outhash);
 
     nblocks = (len + BLOCKSIZE - 1 + 9) / BLOCKSIZE;
@@ -188,10 +184,10 @@ void sha256_hash(void* data, uint64_t len, uint32_t outhash[8])
 
     memcpy(h, sha256_h, sizeof(h));
     for(i=0; i<nblocks; i++)
-        sha256_processblock(paddeddata + i * BLOCKWORDS, h);
+        sha256_processblock((char*) paddeddata + i * BLOCKSIZE, h);
 
     for(i=0; i<N_SQRTS; i++)
-        outhash[i] = htob32(h[i]);
+        outhash[i] = h[i];
 
     free(paddeddata);
 }

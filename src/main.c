@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include <string.h>
+
 #include "sha256.h"
 
 int main(int argc, char** argv)
@@ -12,7 +14,7 @@ int main(int argc, char** argv)
 
     sha256_setup();
 
-    sha256_hash((void*) msg, sizeof(msg), hashed);
+    sha256_hash((void*) msg, strlen(msg), hashed);
     printf("hashed message: 0x");
     for(i=0; i<8; i++)
         printf("%08x", hashed[i]);
