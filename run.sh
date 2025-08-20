@@ -3,7 +3,7 @@
 if make; then
     mkdir -p run
     cd run
-    ../bin/dim
+    ../bin/dim $@
     exit $?
 fi
 

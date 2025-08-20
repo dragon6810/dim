@@ -2,28 +2,42 @@
 
 #include <string.h>
 
-#include "sha256.h"
+#include "commands.h"
+
+void usage(void)
+{
+    printf("usage: dim ");
+    printf("[-h | --help]");
+    printf("<command> [<args>]\n");
+
+    printf("\n");
+
+    printf("commands:\n");
+    printf("    mkrepo\n");
+    printf("        creates a dim repository in the current directory.\n");
+    printf("    mkblob <file>\n");
+    printf("        creates a blob for the given filename, if it exists.\n");
+}
 
 int main(int argc, char** argv)
 {
-    int i;
-
-    FILE *ptr;
-
-    shahash_t hash;
-
-    sha256_setup();
-
-    ptr = fopen("file.c", "r");
-    if(!ptr)
+    if(argc < 2)
+    {
+        usage();
         return 1;
-    sha256_hashfile(ptr, hash);
-    fclose(ptr);
+    }
 
-    printf("0x");
-    for(i=0; i<8; i++)
-        printf("%08x", hash[i]);
-    printf("\n");
+    if     (!strcmp("-h", argv[1]) ||
+            !strcmp("--help", argv[1]))
+        usage();
+    else if(!strcmp("mkrepo", argv[1]))
+        mkrepo(argc - 2, argv + 2);
+    else
+    {
+        printf("unrecognized command \"%s\".\n", argv[1]);
+        usage();
+        return 1;
+    }
 
     return 0;
 }
