@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include "index.h"
+
 void ftree_free(ftree_t* tree)
 {
     ftree_child_t *child, *next;
@@ -20,30 +22,21 @@ void ftree_free(ftree_t* tree)
         child = next;
     }
 }
-
+#if 0
 static void ftree_loadfile(FILE* ptr, ftree_t* out)
 {
     assert(out);
 }
+#endif
 
-void ftree_loadworking(ftree_t* out)
+void ftree_loadindex(void)
 {
-    const char* treepath = ".dim/working-ftree";
+    index_t idx;
 
-    FILE *ptr;
+    index_prune();
+    index_load(&idx);
 
-    if(!access(treepath, F_OK))
-    {
-        ptr = fopen(treepath, "r");
-        if(!ptr)
-        {
-            printf("couldn't open working tree at \"%s\".\n", treepath);
-            exit(1);
-        }
+    
 
-        ftree_loadfile(ptr, out);
-
-        fclose(ptr);
-        return;
-    }
+    index_freeentries(&idx);
 }

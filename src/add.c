@@ -30,6 +30,12 @@ void add(int argc, char** argv)
             exit(1);
         }
 
+        if(index_hasentry(&index, argv[i]))
+        {
+            printf("add: index already contains \"%s\". ignoring.\n", argv[i]);
+            continue;
+        }
+
         newentry = malloc(sizeof(index_entry_t));
         memset(newentry, 0, sizeof(index_entry_t));
         strcpy(newentry->path, argv[i]);

@@ -5,7 +5,67 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "repo.h"
+
 #define INDEX_PATH ".dim/index"
+
+bool index_hasentry(index_t* idx, const char* entry)
+{
+    index_entry_t *cur;
+
+    assert(idx);
+    assert(entry);
+
+    cur = idx->entries;
+    while(cur)
+    {
+        if(!strcmp(cur->path, entry))
+            return true;
+        cur = cur->next;
+    }
+
+    return false;
+}
+
+void index_prune(void)
+{
+    index_t idx;
+    char newpath[PATH_MAX];
+    index_entry_t *cur, *last, *next;
+
+    index_load(&idx);
+
+    last = NULL;
+    cur = idx.entries;
+    while(cur)
+    {
+        next = cur->next;
+        
+        if(!access(cur->path, F_OK) && pathinrepo(cur->path))
+        {
+            last = cur;
+            cur = next;
+
+            pathrelativetorepo(cur->path, newpath);
+            strcpy(cur->path, newpath);
+
+            continue;
+        }
+
+        if(last)
+            last->next = next;
+        else
+            idx.entries = next;
+
+        free(cur);
+        
+        cur = next;
+    }
+
+    index_write(&idx);
+    
+    index_freeentries(&idx);
+}
 
 void index_freeentries(index_t* idx)
 {
@@ -28,6 +88,7 @@ void index_load(index_t* out)
     char *line;
     size_t linelen;
     index_entry_t *newentry, *entrytail;
+    char terminated[PATH_MAX];
 
     assert(out);
 
@@ -49,10 +110,13 @@ void index_load(index_t* out)
             exit(1);
         }
 
+        // chop off \n
+        memcpy(terminated, line, linelen - 1);
+        terminated[linelen] = 0;
+
         newentry = malloc(sizeof(index_entry_t));
         memset(newentry, 0, sizeof(index_entry_t));
-        strcpy(newentry->path, line);
-        free(line);
+        strcpy(newentry->path, terminated);
         if(entrytail)
             entrytail->next = newentry;
         else
@@ -81,7 +145,7 @@ void index_write(index_t* idx)
     entry = idx->entries;
     while(entry)
     {
-        fputs(entry->path, ptr);
+        fprintf(ptr, "%s\n", entry->path);
         entry = entry->next;
     }
 

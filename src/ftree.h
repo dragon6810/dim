@@ -44,6 +44,6 @@ typedef struct ftree_s
 
 // will NOT free node you give it, only recursive children
 void ftree_free(ftree_t* tree);
-void ftree_loadworking(ftree_t* out);
+void ftree_loadindex(void);
 
 #endif
