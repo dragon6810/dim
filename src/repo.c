@@ -43,10 +43,13 @@ bool pathinrepo(const char* path)
 
 void pathrelativetorepo(const char* path, char *outpath)
 {
-    assert(strlen(path) < PATH_MAX);
     int cwdlen;
     char cwd[PATH_MAX];
     char abspath[PATH_MAX];
+
+    assert(path);
+    assert(outpath);
+    assert(strlen(path) < PATH_MAX);
 
     getcwd(cwd, PATH_MAX);
     realpath(path, abspath);
@@ -59,5 +62,8 @@ void pathrelativetorepo(const char* path, char *outpath)
         return;
     }
 
+    if(abspath[cwdlen] == '/')
+        cwdlen++;
+    
     strcpy(outpath, abspath + cwdlen);
 }

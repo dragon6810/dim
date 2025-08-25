@@ -33,6 +33,7 @@ void index_prune(void)
     char newpath[PATH_MAX];
     index_entry_t *cur, *last, *next;
 
+    memset(&idx, 0, sizeof(index_t));
     index_load(&idx);
 
     last = NULL;
@@ -43,11 +44,11 @@ void index_prune(void)
         
         if(!access(cur->path, F_OK) && pathinrepo(cur->path))
         {
-            last = cur;
-            cur = next;
-
             pathrelativetorepo(cur->path, newpath);
             strcpy(cur->path, newpath);
+
+            last = cur;
+            cur = next;
 
             continue;
         }
@@ -112,7 +113,7 @@ void index_load(index_t* out)
 
         // chop off \n
         memcpy(terminated, line, linelen - 1);
-        terminated[linelen] = 0;
+        terminated[linelen-1] = 0;
 
         newentry = malloc(sizeof(index_entry_t));
         memset(newentry, 0, sizeof(index_entry_t));

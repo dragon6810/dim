@@ -19,6 +19,8 @@ void usage(void)
     printf("        creates a blob for the given filename, if it exists.\n");
     printf("    add <files>\n");
     printf("        creates a blob and updates trees for the given filenames, if they exist.\n");
+    printf("    commit\n");
+    printf("        creates a new commits of indexed files.\n");
 }
 
 int main(int argc, char** argv)
@@ -38,6 +40,8 @@ int main(int argc, char** argv)
         mkblob(argc - 2, argv + 2);
     else if(!strcmp("add", argv[1]))
         add(argc - 2, argv + 2);
+    else if(!strcmp("commit", argv[1]))
+        commit(argc - 2, argv + 2);
     else
     {
         printf("unrecognized command \"%s\".\n", argv[1]);
